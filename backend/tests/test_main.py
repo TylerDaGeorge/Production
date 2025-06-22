@@ -41,3 +41,8 @@ def test_create_job_and_flow():
     response = client.post("/jobs/complete", json={"job_id": 1})
     assert response.json()["status"] == "finished"
 
+    # user should have earned points
+    response = client.get("/users/alice")
+    assert response.status_code == 200
+    assert response.json()["points"] >= 1
+

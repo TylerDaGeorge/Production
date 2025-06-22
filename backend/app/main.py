@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 app = FastAPI(title="Hybrid Production Scheduler")
 
@@ -30,6 +30,19 @@ def create_user(user: Dict):
     _next_user_id += 1
     _users.append(db_user)
     return db_user
+
+
+@app.get("/users/")
+def list_users():
+    return _users
+
+
+@app.get("/users/{username}")
+def get_user(username: str):
+    user = _find_user(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    return user
 
 
 @app.get("/jobs/")
@@ -74,6 +87,11 @@ def complete_job(payload: Dict):
     if not job:
         raise HTTPException(status_code=404, detail="job not found")
     job["status"] = "finished"
+    if job["operator_id"] is not None:
+        user = next((u for u in _users if u["id"] == job["operator_id"]), None)
+        if user:
+            points = 1 + (1 if job.get("hot") else 0)
+            user["points"] += points
     return job
 
 
