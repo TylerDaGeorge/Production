@@ -66,3 +66,21 @@ def test_hot_jobs_and_leaderboard():
 
     hot_jobs = client.get("/jobs/hot").json()
     assert any(j["id"] == job["id"] for j in hot_jobs)
+
+
+def test_unclaim_and_job_detail():
+    client.post("/users/", json={"username": "dave"})
+    job = client.post("/jobs/", json={"part_number": "123"}).json()
+    jid = job["id"]
+    client.post("/jobs/claim", json={"job_id": jid, "username": "dave"})
+
+    detail = client.get(f"/jobs/{jid}").json()
+    assert detail["status"] == "running"
+
+    unclaimed = client.post("/jobs/unclaim", json={"job_id": jid}).json()
+    assert unclaimed["status"] == "unclaimed"
+    assert unclaimed["operator_id"] is None
+
+    detail = client.get(f"/jobs/{jid}").json()
+    events = [h["event"] for h in detail["history"]]
+    assert "unclaimed" in events
