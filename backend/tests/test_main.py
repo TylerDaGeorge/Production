@@ -8,6 +8,7 @@ if str(ROOT) not in sys.path:
 
 from fastapi.testclient import TestClient
 from app.main import app
+from datetime import datetime, timedelta
 
 client = TestClient(app)
 
@@ -45,3 +46,23 @@ def test_create_job_and_flow():
     response = client.get("/users/alice")
     assert response.status_code == 200
     assert response.json()["points"] >= 1
+
+
+def test_hot_jobs_and_leaderboard():
+    client.post("/users/", json={"username": "bob"})
+    client.post("/users/", json={"username": "carol"})
+    due = (datetime.utcnow() + timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/jobs/",
+        json={"part_number": "XYZ", "hot": True, "due_date": due},
+    )
+    job = response.json()
+    client.post("/jobs/claim", json={"job_id": job["id"], "username": "bob"})
+    client.post("/jobs/complete", json={"job_id": job["id"]})
+
+    leaderboard = client.get("/leaderboard").json()
+    assert leaderboard[0]["username"] == "bob"
+    assert leaderboard[0]["points"] >= 3
+
+    hot_jobs = client.get("/jobs/hot").json()
+    assert any(j["id"] == job["id"] for j in hot_jobs)
