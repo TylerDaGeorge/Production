@@ -190,3 +190,21 @@ The FastAPI backend currently provides a few in-memory job management endpoints.
 | GET   | `/users/{username}` | Retrieve a user by username |
 | GET   | `/users/{username}/jobs` | List jobs assigned to user |
 
+
+## 🖥️ Basic Web UI
+A minimal HTML interface is provided under `frontend/`. It communicates with the
+existing API and can be served locally.
+
+### Run the backend
+```bash
+cd backend/app
+python main.py
+```
+This starts the API at `http://localhost:8000`.
+
+### Serve the UI
+From the project root run:
+```bash
+python -m http.server 8080 -d frontend
+```
+Then open `http://localhost:8080` in your browser.
