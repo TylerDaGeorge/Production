@@ -184,6 +184,7 @@ The FastAPI backend currently provides a few in-memory job management endpoints.
 | POST  | `/jobs/unclaim` | Unclaim job `{job_id}`          |
 | POST  | `/jobs/complete`| Complete job `{job_id}`         |
 | GET   | `/jobs/{job_id}`| Retrieve a job by ID            |
+| DELETE| `/jobs/{job_id}`| Delete a job by ID              |
 | POST  | `/users/`       | Create a user `{username, password}` |
 | GET   | `/users/`       | List all users                     |
 | GET   | `/users/{username}` | Retrieve a user by username |

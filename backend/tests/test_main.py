@@ -98,3 +98,13 @@ def test_user_jobs_endpoint():
     client.post("/jobs/complete", json={"job_id": jid})
     jobs = client.get("/users/erin/jobs").json()
     assert any(j["id"] == jid and j["status"] == "finished" for j in jobs)
+
+
+def test_delete_job():
+    job = client.post("/jobs/", json={"part_number": "DEL"}).json()
+    jid = job["id"]
+    response = client.delete(f"/jobs/{jid}")
+    assert response.status_code == 200
+    assert response.json()["id"] == jid
+    response = client.get(f"/jobs/{jid}")
+    assert response.status_code == 404
