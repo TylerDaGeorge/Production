@@ -43,3 +43,12 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class JobClaim(BaseModel):
+    job_id: int
+    username: str
+
+
+class JobComplete(BaseModel):
+    job_id: int
