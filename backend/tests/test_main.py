@@ -1,5 +1,5 @@
-# Ensure project root is on the import path so that app and local fastapi stubs
-# are discoverable when tests run from the ``tests`` directory.
+# Ensure the project root is on the import path so that ``app`` can be
+# discovered when tests run from the ``tests`` directory.
 import sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]

@@ -165,13 +165,16 @@ To build a modern shop floor management tool that:
 git clone https://github.com/your-org/hybrid-production-app.git
 cd hybrid-production-app
 
-# Run backend tests
+# Install dependencies for the backend
 cd backend
+pip install -r requirements.txt
+
+# Run backend tests
 pytest
 ```
 
-## 📚 Available Endpoints (Stubbed)
-The lightweight backend provides a few in-memory job management endpoints.
+## 📚 Available Endpoints
+The FastAPI backend currently provides a few in-memory job management endpoints.
 
 | Method | Path            | Description                     |
 |-------|-----------------|---------------------------------|
