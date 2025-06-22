@@ -6,6 +6,7 @@ class TestClient:
     def __init__(self, app):
         self.app = app
 
+    def _call(self, handler, json, path_params=None):
     def _call(self, handler, json):
         sig = inspect.signature(handler)
         kwargs = {}
@@ -18,6 +19,8 @@ class TestClient:
                 kwargs[name] = val
             elif json and name in json:
                 kwargs[name] = json[name]
+            elif path_params and name in path_params:
+                kwargs[name] = path_params[name]
         if json and not kwargs and len(sig.parameters) == 1:
             # if single body parameter, pass entire json
             param_name = next(iter(sig.parameters))
@@ -25,6 +28,17 @@ class TestClient:
         return handler(**kwargs)
 
     def get(self, path):
+        handler, params = self.app._match_route("GET", path)
+        if handler is None:
+            return Response(None, status_code=404)
+        result = self._call(handler, None, params)
+        return Response(result, status_code=200)
+
+    def post(self, path, json=None):
+        handler, params = self.app._match_route("POST", path)
+        if handler is None:
+            return Response(None, status_code=404)
+        result = self._call(handler, json or {}, params)
         handler = self.app.routes.get(("GET", path))
         if handler is None:
             return Response(None, status_code=404)

@@ -183,4 +183,6 @@ The FastAPI backend currently provides a few in-memory job management endpoints.
 | POST  | `/jobs/claim`   | Claim job `{job_id, username}`  |
 | POST  | `/jobs/complete`| Complete job `{job_id}`         |
 | POST  | `/users/`       | Create a user `{username, password}` |
+| GET   | `/users/`       | List all users                     |
+| GET   | `/users/{username}` | Retrieve a user by username |
 
