@@ -1,4 +1,4 @@
-from . import Response, Depends
+from . import Response, Depends, HTTPException
 import inspect
 
 
@@ -31,12 +31,28 @@ class TestClient:
         handler, params = self.app._match_route("GET", path)
         if handler is None:
             return Response(None, status_code=404)
-        result = self._call(handler, None, params)
+        try:
+            result = self._call(handler, None, params)
+        except HTTPException as exc:
+            return Response(exc.detail, status_code=exc.status_code)
         return Response(result, status_code=200)
 
     def post(self, path, json=None):
         handler, params = self.app._match_route("POST", path)
         if handler is None:
             return Response(None, status_code=404)
-        result = self._call(handler, json or {}, params)
+        try:
+            result = self._call(handler, json or {}, params)
+        except HTTPException as exc:
+            return Response(exc.detail, status_code=exc.status_code)
+        return Response(result, status_code=200)
+
+    def delete(self, path):
+        handler, params = self.app._match_route("DELETE", path)
+        if handler is None:
+            return Response(None, status_code=404)
+        try:
+            result = self._call(handler, None, params)
+        except HTTPException as exc:
+            return Response(exc.detail, status_code=exc.status_code)
         return Response(result, status_code=200)

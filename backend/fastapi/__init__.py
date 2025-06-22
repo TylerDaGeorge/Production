@@ -99,6 +99,12 @@ class FastAPI:
             return func
         return decorator
 
+    def delete(self, path):
+        def decorator(func):
+            self.routes[("DELETE", path)] = func
+            return func
+        return decorator
+
 
 class Depends:
     def __init__(self, dependency):
