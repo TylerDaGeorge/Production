@@ -9,6 +9,7 @@ class Response:
 class FastAPI:
     """Very small subset of FastAPI used for tests and simple local runs."""
 
+    """Very small subset of FastAPI used for tests."""
     def __init__(self, title=None):
         self.title = title
         self.routes = {}

@@ -1,5 +1,8 @@
 from fastapi import FastAPI, HTTPException
+
 from typing import List, Dict, Optional
+
+from typing import List, Dict
 
 app = FastAPI(title="Hybrid Production Scheduler")
 
@@ -43,7 +46,6 @@ def get_user(username: str):
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
     return user
-
 
 @app.get("/jobs/")
 def read_jobs():

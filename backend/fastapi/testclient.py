@@ -7,6 +7,7 @@ class TestClient:
         self.app = app
 
     def _call(self, handler, json, path_params=None):
+    def _call(self, handler, json):
         sig = inspect.signature(handler)
         kwargs = {}
         for name, param in sig.parameters.items():
@@ -38,6 +39,17 @@ class TestClient:
         if handler is None:
             return Response(None, status_code=404)
         result = self._call(handler, json or {}, params)
+        handler = self.app.routes.get(("GET", path))
+        if handler is None:
+            return Response(None, status_code=404)
+        result = self._call(handler, None)
+        return Response(result, status_code=200)
+
+    def post(self, path, json=None):
+        handler = self.app.routes.get(("POST", path))
+        if handler is None:
+            return Response(None, status_code=404)
+        result = self._call(handler, json or {})
         return Response(result, status_code=200)
 
 

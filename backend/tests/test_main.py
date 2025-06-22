@@ -45,4 +45,3 @@ def test_create_job_and_flow():
     response = client.get("/users/alice")
     assert response.status_code == 200
     assert response.json()["points"] >= 1
-
