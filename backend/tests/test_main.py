@@ -18,6 +18,10 @@ def test_read_jobs_empty():
     assert response.json() == []
 
 def test_create_job_and_flow():
+    # create a user to claim jobs
+    response = client.post("/users/", json={"username": "alice", "password": "pw"})
+    assert response.status_code == 200
+
     # create a new job
     response = client.post("/jobs/", json={"part_number": "ABC123"})
     assert response.status_code == 200
@@ -36,3 +40,4 @@ def test_create_job_and_flow():
     # complete the job
     response = client.post("/jobs/complete", json={"job_id": 1})
     assert response.json()["status"] == "finished"
+
