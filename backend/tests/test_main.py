@@ -7,8 +7,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from fastapi.testclient import TestClient
+from fastapi import HTTPException
 from app.main import app
 from datetime import datetime, timedelta
+import pytest
 
 client = TestClient(app)
 
@@ -84,3 +86,8 @@ def test_unclaim_and_job_detail():
     detail = client.get(f"/jobs/{jid}").json()
     events = [h["event"] for h in detail["history"]]
     assert "unclaimed" in events
+
+
+def test_job_detail_not_found():
+    with pytest.raises(HTTPException):
+        client.get("/jobs/9999")
