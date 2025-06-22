@@ -1,0 +1,371 @@
+End Product Goals
+Phone app
+Employee logins
+Adaptive production schedule
+Gamified job board
+Requested part status tracking
+Part not started
+Material ordered
+Waiting for setup
+Setting up
+Running job
+Job finished
+At external vendor
+Background job metric tracking KPI
+Seamlessly easy to use
+
+
+NOTE: Keep UI modular to make future redesign easier
+Hybrid Smart Production Planning + Gamified Job Board Roadmap
+
+Phase 1: Core Scheduling + Basic Job Board
+Goal: Build a solid scheduling backbone and simple job board where operators can see and pick jobs.
+Features:
+APS Engine generates optimized schedules based on setup times, due dates, machine availability
+Job Board UI lists all current jobs with due dates, priorities, and statuses
+Operators can claim/unclaim jobs from the board
+Job details and instructions visible on job cards
+Manager dashboard to monitor assignments and schedule adherence
+Tech Notes:
+Backend REST API for scheduling, job status, assignments
+Frontend React/Vue with drag-and-drop or click-to-claim UI
+Basic user authentication & roles (operators, managers)
+
+Phase 2: Gamification Layer & Priority Highlights
+Goal: Add engagement and motivation with gamification and dynamic job priority indicators.
+Features:
+“Hot Job” tagging: jobs nearing due date or critical flagged prominently on job board
+Points system: operators earn points for completing jobs, bonuses for hot jobs or on-time delivery
+Leaderboards: daily/weekly rankings displayed publicly
+Badges/achievements for milestones (e.g., “5 hot jobs completed”)
+Notifications/reminders for hot jobs or when jobs are unclaimed too long
+Tech Notes:
+Points and badges tracked in user profiles in backend
+Real-time UI updates (WebSockets or polling) for hot jobs and leaderboard
+Notification system (in-app and optionally push/email)
+
+Phase 3: Advanced Scheduling Adjustments & Manager Controls
+Goal: Improve scheduling flexibility with AI and allow managers to nudge assignments.
+Features:
+LLM-powered assistant to accept natural language commands (“Prioritize rush order #123”)
+Auto-suggestions for unclaimed or delayed jobs to specific operators based on skills/availability
+Manager override to reassign or lock jobs when necessary
+Analytics on job board usage, claim patterns, and bottlenecks
+Tech Notes:
+Integration with OpenAI or other LLM APIs
+Rules engine to match jobs with operator skill sets and workload
+Enhanced role permissions for overrides and nudges
+
+Phase 4: Workforce Performance & Feedback Loop
+Goal: Track operator performance and use data to refine scheduling and gamification.
+Features:
+Time and performance tracking: jobs completed, scrap rates, rework logged per operator
+Coaching suggestions based on performance trends
+Feedback system for operators to rate jobs and report issues
+Adjust point rewards and scheduling priorities based on operator feedback and data
+Tech Notes:
+Analytics dashboards for managers
+Backend ML models or heuristics for coaching & adjustment logic
+Feedback form integration
+
+Phase 5: Inventory Integration & Predictive Forecasting
+Goal: Connect inventory status to job availability and forecast future workload/resource needs.
+Features:
+Real-time inventory sync: jobs become claimable only if required materials/tools are available
+Automated reorder triggers based on upcoming jobs and lead times
+Forecasting engine for expected workloads and resource planning
+Alerts for material shortages affecting job scheduling
+Tech Notes:
+Integration with inventory management systems or IoT sensors
+Forecasting libraries/models (Prophet, ARIMA)
+Scheduler updates to block/unblock jobs dynamically based on inventory
+
+Phase 6: Mobile App & Enhanced User Experience
+Goal: Provide on-the-go access and improve usability for operators and managers.
+Features:
+Mobile-friendly job board with claim/complete functionality
+Real-time notifications for hot jobs, point updates, and alerts
+Offline mode with sync for limited connectivity environments
+Visual digital work instructions integrated with job cards
+Tech Notes:
+Cross-platform mobile app (React Native, Flutter) or responsive web design
+Push notification services (Firebase Cloud Messaging, OneSignal)
+
+Cross-Phase Considerations
+Security & Roles: Robust authentication and role-based access control throughout
+Scalability: Modular backend microservices or scalable monolith depending on size
+DevOps: CI/CD pipelines, containerization, cloud deployment
+Data Privacy & Compliance: Ensure data handling meets relevant regulations
+Pre-Development Planning Checklist
+Step 1: User and Stakeholder Discovery – Complete
+Users: Operators and Managers.
+User Research Done: Not yet conducted.
+Current Pain Points:
+Lack of clarity on how many parts to produce.
+Difficulty locating critical job paperwork (prints, inspection docs).
+Uncertainty about material availability or location.
+Motivations:
+Gamification is likely to improve engagement slightly and reduce overhead micromanagement.
+Operators are familiar with gaming, so points and streak systems will resonate.
+Key motivators: recognition and smoother workflows.
+Step 2: Data Architecture & Flow Design – Complete
+2.1 Data to Store
+Job Information:
+Part name, operation number, build quantity, due date, ETA
+Operator Data:
+Name, login credentials, points, personal performance records (e.g., max parts made per day)
+Job Statuses:
+Not started, needs material ordered, waiting for material, waiting to be set up, getting set up, running, finished, at external vendor
+Inventory Data:
+Part-level inventory count to determine production needs based on forecast
+Forecasting Data (read-only or reference)
+Due quantities and due dates from customers
+Historical Performance:
+Operator-level metrics (optional but desirable)
+2.2 Key Data Relationships
+Each part has a list of operations (e.g., op10, op20).
+Each operation belongs to exactly one part.
+Each operation is claimed by one operator at a time.
+Each operator may work on multiple part-operation combos — just not simultaneously on the same one as another operator.
+When all operations of a part are complete, the part is marked complete and added to stock.
+2.3 Data Update Behavior
+Real-time updates required:
+Any change to job status, assignments, completions, etc., should instantly reflect across the app.
+Step 3: System Integrations – Complete
+3.1 Current Tracking Methods
+Inventory:
+Physically stored in shipping; manually monitored.
+Restocking is inconsistent and relies on shipping staff noticing low levels.
+Missed signals lead to delays in ordering and fulfillment.
+Forecasted Demand:
+Provided by customers via Excel spreadsheets.
+These are non-binding but used internally for planning.
+Actual Orders:
+Customers send actual order numbers when parts are needed.
+Job Information:
+Partially stored in ERP (JobBOSS), but entries are incomplete/unreliable.
+Setup information lives in Word documents created by production staff.
+Performance Metrics:
+KPIs like cycle times, scrap rates, and daily output are not consistently tracked.
+Some efforts have begun to capture this in Excel manually.
+3.2 Existing Tools and Systems
+ERP: JobBOSS (underutilized; data unreliable)
+Forecasts: Excel files from customers
+Setup Sheets: Word documents
+Emerging KPI Tracking: Excel spreadsheet (in progress)
+3.3 Integration Strategy
+Data Integration via Periodic Imports:
+No direct API integrations planned for now.
+Excel file imports (e.g., forecasts) will be used to populate and update the app’s schedule and job planning logic.
+Step 4: Authorization & Access Control – Complete
+4.1 Defined Roles
+Operator
+Department Lead
+Shipping
+Admin
+4.2 Permissions Breakdown
+Operators:
+See and claim jobs
+View own and others’ points and stats
+Update job status (e.g., “running,” “finished”)
+Department Leads:
+See all jobs and user stats
+Assign/reassign jobs to operators
+View job board analytics
+Shipping:
+Update job statuses related to material (e.g., "waiting for material", "material received")
+Promote jobs to “hot” or “emergency” status for urgent attention
+Admins:
+Full access, including user/role management, analytics, system configuration, and overrides
+4.3 Stat Visibility
+Full transparency: All users can see everyone else’s points, badges, and job history.
+Step 5: Scalability & Hosting Decisions – Complete
+5.1 Hosting Model
+Hybrid-first: Primarily local usage with cloud syncing capabilities.
+Enables internal functionality even if internet access is temporarily unavailable.
+Syncs data to the cloud for multi-device access, mobile use, backups, and optional remote management.
+5.2 Expected Users
+10–20 concurrent users, mostly operators and department leads.
+5.3 Scaling Plan
+Start with a functional, lightweight MVP with:
+Local-first logic and storage.
+Modular backend that allows scaling up (e.g., migrating to cloud microservices later).
+App must be usable from day one, not stripped down.
+Step 6: MVP Scope Definition – Complete
+6.1 Minimum Launch Features
+Job Statuses:
+Not Started
+Running
+Finished
+Gamification:
+Points system (no badges or leaderboards at launch)
+Data Handling:
+All job and schedule data will be manually entered during MVP phase.
+Jobs will originate from shipping requests with:
+Part number
+Operation number
+Build quantity
+Due date
+Forecast Integration:
+Will be incorporated after MVP to automate scheduling and trigger job creation.
+6.2 Operator Day-One Needs
+Ability to view job details:
+Part number
+Operation
+Due date
+Build quantity
+Ability to claim and update job status
+6.3 Department Lead Day-One Needs
+Visibility and control of the job queue
+Ability to schedule or prioritize jobs manually
+Step 7: UX Design & User Flow – Complete
+7.1 Mockups/Wireframes
+Not yet created
+(A wireframe pass can be generated later based on these workflows.)
+7.2 Desired User Workflows
+Operator Workflow:
+Open the app.
+Navigate to the Job Board.
+Browse available jobs (filtered by department or machine if needed).
+Claim or update the job they’re working on (e.g., “Not Started” → “Running”).
+Exit the app — fast and minimal friction.
+Department Lead Workflow:
+Mostly identical to the operator workflow.
+May include ability to:
+Assign jobs directly to operators.
+Reprioritize jobs in the queue.
+Shipping Workflow:
+Open the app.
+Go to Job Request Area.
+Enter new job request with part number, quantity, and due date.
+Optionally:
+Tag job as “Hot”.
+Update material status (e.g., “Material Ordered”).
+Step 8: Gamification Mechanics – Complete
+8.1 Point System Rules
+Base Points: Earned for each job completed.
+Bonus Points:
+More points awarded for:
+Difficult jobs
+“Hot” (urgent) jobs
+Performance-Based Points:
++1 if daily average output exceeds previously recorded average for that part.
++1 if operator sets a new personal best for most parts completed in a single day on a given part.
+8.2 Team Bonuses
+Weekly Department Goal:
+If department collectively earns 5+ points, they get a real-world reward (e.g., brownies or cookies).
+Rewards may expand in the future depending on management approval.
+8.3 Stats to Track per Operator
+Individual job history and completion count.
+Personal records for:
+Most parts completed in a single day (per part).
+Current and best daily averages (per part).
+Points history and streak status.
+
+Pre-Development Solutions for Hybrid Smart Production Planning App
+
+1. Wireframes & UI/UX
+Solution:
+Use Figma for collaborative wireframe and UI mockup creation.
+Design operator views with:
+Large buttons for gloved hands
+High contrast and minimal UI depth (flat navigation)
+Real-time feedback on job status updates
+Create tailored mockups for:
+Operator Dashboard
+Department Lead Dashboard
+Shipping Request Interface
+Admin Panel
+
+2. Testing Strategy
+Solution:
+Unit Testing: Jest (frontend) and Pytest or equivalent for backend.
+Integration Testing: Cypress or Playwright for frontend workflows.
+Manual Usability Testing: Weekly feedback sessions with a small group of operators.
+Test Environment: Isolate a staging environment with dummy data for QA.
+Acceptance Criteria: Checklist per feature based on roadmap goals.
+
+3. Database Schema Design
+Solution:
+Use PostgreSQL for MVP.
+Design core tables:
+Jobs (id, part_no, operation_no, quantity, due_date, status, claimed_by, timestamps)
+Users (id, name, role, credentials, points, badges)
+Job_History (job_id, user_id, action, timestamp)
+Inventory (part_no, count, location)
+Performance_Records (user_id, part_no, day, quantity)
+Use an ORM like SQLAlchemy or Prisma for portability.
+
+4. Sync and Conflict Resolution
+Solution:
+Use PouchDB + CouchDB model for local-first with sync.
+Conflict resolution rules:
+Last-write-wins for non-critical fields (e.g., comments)
+Server-wins for job claims (locks jobs once claimed)
+Queue sync updates and apply atomic operations
+Sync triggers:
+App launch
+Every 5 minutes or manual refresh
+
+5. Security Threat Modeling
+Solution:
+Use JWT tokens with short-lived access and refresh tokens.
+Input validation on client and server side.
+Role-based access control (RBAC) middleware.
+Audit logging for:
+Job status changes
+Points earned
+Manual overrides by managers/admins
+HTTPS enforcement and encrypted local storage.
+
+6. Change Management & Operator Buy-in
+Solution:
+Beta test with 2–3 willing operators and a department lead.
+Offer walkthrough training (via app onboarding assistant).
+Use low-stakes gamification at first: points but no penalties.
+Collect feedback weekly and showcase changes implemented based on input.
+
+7. Admin Tools
+Solution:
+Build a dedicated Admin Dashboard with:
+Job queue override controls
+User management (add/remove/reset roles/passwords)
+Analytics views (top performers, overdue jobs, active users)
+Configuration flags (e.g., turn gamification on/off)
+
+8. Logging and Monitoring
+Solution:
+Use LogRocket or Sentry for frontend issue tracking.
+Server logs to file + cloud storage (structured logs with timestamps).
+Event log table in DB for operator actions.
+Simple log viewer UI for admin/debug tools.
+
+9. Backup & Data Recovery
+Solution:
+Local daily backup of the database in JSON/SQL format.
+Cloud sync mirrors job and user data to offsite storage.
+Versioning for critical tables (soft deletes, historical tracking).
+Admin UI with manual restore option.
+
+10. Feature Flags / Kill Switches
+Solution:
+Implement feature flag framework using:
+.env variables for development
+Admin-controlled toggles in database for runtime changes
+Kill switches for:
+Gamification
+Auto-scheduling engine
+Notification system
+UI will show disabled features as grayed-out or hidden depending on role
+
+11. Optional Additions (If Time Permits)
+QR Scanning:
+Use device camera to scan QR tags on bins/job sheets.
+Auto-load job details when scanned.
+Time Tracking:
+Automatically log timestamps on status changes.
+Calculate total time per job + operator efficiency.
+Chatbot Assistant:
+In-app guide using OpenAI GPT for first-time users.
+Handles basic questions like: "How do I claim a job?"
+
