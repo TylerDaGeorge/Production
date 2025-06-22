@@ -1,8 +1,6 @@
 from fastapi import FastAPI, HTTPException
-
-from typing import List, Dict, Optional
-
 from typing import List, Dict
+from datetime import datetime
 
 app = FastAPI(title="Hybrid Production Scheduler")
 
@@ -40,6 +38,11 @@ def list_users():
     return _users
 
 
+@app.get("/leaderboard")
+def leaderboard():
+    return sorted(_users, key=lambda u: u.get("points", 0), reverse=True)
+
+
 @app.get("/users/{username}")
 def get_user(username: str):
     user = _find_user(username)
@@ -52,9 +55,29 @@ def read_jobs():
     return _jobs
 
 
+@app.get("/jobs/hot")
+def read_hot_jobs():
+    hot_jobs = []
+    now = datetime.utcnow()
+    for job in _jobs:
+        if job.get("hot"):
+            hot_jobs.append(job)
+            continue
+        due = job.get("due_date")
+        if due:
+            try:
+                due_dt = datetime.fromisoformat(due)
+                if (due_dt - now).total_seconds() <= 24 * 3600:
+                    hot_jobs.append(job)
+            except ValueError:
+                pass
+    return hot_jobs
+
+
 @app.post("/jobs/")
 def create_job(job: Dict):
     global _next_job_id
+    created = datetime.utcnow().isoformat()
     record = {
         "part_number": job.get("part_number"),
         "description": job.get("description"),
@@ -63,7 +86,9 @@ def create_job(job: Dict):
         "id": _next_job_id,
         "status": "unclaimed",
         "operator_id": None,
-        "history": [],
+        "created_at": created,
+        "completed_at": None,
+        "history": [{"timestamp": created, "event": "created"}],
     }
     _next_job_id += 1
     _jobs.append(record)
@@ -80,6 +105,7 @@ def claim_job(payload: Dict):
         raise HTTPException(status_code=404, detail="user not found")
     job["status"] = "running"
     job["operator_id"] = user["id"]
+    job["history"].append({"timestamp": datetime.utcnow().isoformat(), "event": f"claimed by {user['username']}"})
     return job
 
 
@@ -89,10 +115,19 @@ def complete_job(payload: Dict):
     if not job:
         raise HTTPException(status_code=404, detail="job not found")
     job["status"] = "finished"
+    job["completed_at"] = datetime.utcnow().isoformat()
+    job["history"].append({"timestamp": job["completed_at"], "event": "completed"})
     if job["operator_id"] is not None:
         user = next((u for u in _users if u["id"] == job["operator_id"]), None)
         if user:
             points = 1 + (1 if job.get("hot") else 0)
+            due = job.get("due_date")
+            if due:
+                try:
+                    if datetime.utcnow() <= datetime.fromisoformat(due):
+                        points += 1
+                except ValueError:
+                    pass
             user["points"] += points
     return job
 
