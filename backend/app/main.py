@@ -50,6 +50,14 @@ def get_user(username: str):
         raise HTTPException(status_code=404, detail="user not found")
     return user
 
+
+@app.get("/users/{username}/jobs")
+def get_user_jobs(username: str):
+    user = _find_user(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    return [j for j in _jobs if j.get("operator_id") == user["id"]]
+
 @app.get("/jobs/")
 def read_jobs():
     return _jobs

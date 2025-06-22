@@ -84,3 +84,17 @@ def test_unclaim_and_job_detail():
     detail = client.get(f"/jobs/{jid}").json()
     events = [h["event"] for h in detail["history"]]
     assert "unclaimed" in events
+
+
+def test_user_jobs_endpoint():
+    client.post("/users/", json={"username": "erin"})
+    job = client.post("/jobs/", json={"part_number": "999"}).json()
+    jid = job["id"]
+    client.post("/jobs/claim", json={"job_id": jid, "username": "erin"})
+
+    jobs = client.get("/users/erin/jobs").json()
+    assert any(j["id"] == jid for j in jobs)
+
+    client.post("/jobs/complete", json={"job_id": jid})
+    jobs = client.get("/users/erin/jobs").json()
+    assert any(j["id"] == jid and j["status"] == "finished" for j in jobs)

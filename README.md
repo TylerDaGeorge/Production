@@ -187,4 +187,5 @@ The FastAPI backend currently provides a few in-memory job management endpoints.
 | POST  | `/users/`       | Create a user `{username, password}` |
 | GET   | `/users/`       | List all users                     |
 | GET   | `/users/{username}` | Retrieve a user by username |
+| GET   | `/users/{username}/jobs` | List jobs assigned to user |
 
