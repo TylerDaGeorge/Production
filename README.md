@@ -168,6 +168,9 @@ cd hybrid-production-app
 # Run backend tests
 cd backend
 pytest
+
+# Start the lightweight server
+python -m app.server
 ```
 
 ## 📚 Available Endpoints (Stubbed)
