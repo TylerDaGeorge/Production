@@ -165,8 +165,18 @@ To build a modern shop floor management tool that:
 git clone https://github.com/your-org/hybrid-production-app.git
 cd hybrid-production-app
 
-# Install dependencies
-npm install         # or pip install -r requirements.txt for backend
+# Run backend tests
+cd backend
+pytest
+```
 
-# Start local server
-npm run dev         # or uvicorn main:app --reload
+## 📚 Available Endpoints (Stubbed)
+The lightweight backend provides a few in-memory job management endpoints.
+
+| Method | Path            | Description                     |
+|-------|-----------------|---------------------------------|
+| GET   | `/jobs/`        | List all jobs                   |
+| POST  | `/jobs/`        | Create a job `{part_number}`    |
+| POST  | `/jobs/claim`   | Claim job `{job_id, username}`  |
+| POST  | `/jobs/complete`| Complete job `{job_id}`         |
+
