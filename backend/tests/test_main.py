@@ -66,3 +66,24 @@ def test_hot_jobs_and_leaderboard():
 
     hot_jobs = client.get("/jobs/hot").json()
     assert any(j["id"] == job["id"] for j in hot_jobs)
+
+
+def test_badges_awarded():
+    client.post("/users/", json={"username": "dave"})
+    due = (datetime.utcnow() + timedelta(hours=2)).isoformat()
+    response = client.post("/jobs/", json={"part_number": "BADGE", "hot": True, "due_date": due})
+    job = response.json()
+    client.post("/jobs/claim", json={"job_id": job["id"], "username": "dave"})
+    client.post("/jobs/complete", json={"job_id": job["id"]})
+    badges = client.get("/users/dave/badges").json()
+    assert "Hotshot" in badges
+
+
+def test_rookie_badge_after_five_jobs():
+    client.post("/users/", json={"username": "erin"})
+    for i in range(5):
+        job = client.post("/jobs/", json={"part_number": f"R{i}"}).json()
+        client.post("/jobs/claim", json={"job_id": job["id"], "username": "erin"})
+        client.post("/jobs/complete", json={"job_id": job["id"]})
+    badges = client.get("/users/erin/badges").json()
+    assert "Rookie" in badges

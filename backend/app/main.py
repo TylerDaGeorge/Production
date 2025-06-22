@@ -27,6 +27,8 @@ def create_user(user: Dict):
         "username": user["username"],
         "role": user.get("role", "operator"),
         "points": 0,
+        "completed_count": 0,
+        "badges": [],
     }
     _next_user_id += 1
     _users.append(db_user)
@@ -41,6 +43,14 @@ def list_users():
 @app.get("/leaderboard")
 def leaderboard():
     return sorted(_users, key=lambda u: u.get("points", 0), reverse=True)
+
+
+@app.get("/users/{username}/badges")
+def get_user_badges(username: str):
+    user = _find_user(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+    return user.get("badges", [])
 
 
 @app.get("/users/{username}")
@@ -129,6 +139,11 @@ def complete_job(payload: Dict):
                 except ValueError:
                     pass
             user["points"] += points
+            user["completed_count"] += 1
+            if job.get("hot") and "Hotshot" not in user["badges"]:
+                user["badges"].append("Hotshot")
+            if user["completed_count"] >= 5 and "Rookie" not in user["badges"]:
+                user["badges"].append("Rookie")
     return job
 
 
