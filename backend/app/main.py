@@ -55,6 +55,15 @@ def read_jobs():
     return _jobs
 
 
+@app.get("/jobs/{job_id}")
+def read_job(job_id: int):
+    job_id = int(job_id)
+    job = next((j for j in _jobs if j["id"] == job_id), None)
+    if not job:
+        raise HTTPException(status_code=404, detail="job not found")
+    return job
+
+
 @app.get("/jobs/hot")
 def read_hot_jobs():
     hot_jobs = []
@@ -97,7 +106,8 @@ def create_job(job: Dict):
 
 @app.post("/jobs/claim")
 def claim_job(payload: Dict):
-    job = next((j for j in _jobs if j["id"] == payload.get("job_id")), None)
+    job_id = int(payload.get("job_id"))
+    job = next((j for j in _jobs if j["id"] == job_id), None)
     if not job:
         raise HTTPException(status_code=404, detail="job not found")
     user = _find_user(payload.get("username"))
@@ -109,9 +119,22 @@ def claim_job(payload: Dict):
     return job
 
 
+@app.post("/jobs/unclaim")
+def unclaim_job(payload: Dict):
+    job_id = int(payload.get("job_id"))
+    job = next((j for j in _jobs if j["id"] == job_id), None)
+    if not job:
+        raise HTTPException(status_code=404, detail="job not found")
+    job["status"] = "unclaimed"
+    job["operator_id"] = None
+    job["history"].append({"timestamp": datetime.utcnow().isoformat(), "event": "unclaimed"})
+    return job
+
+
 @app.post("/jobs/complete")
 def complete_job(payload: Dict):
-    job = next((j for j in _jobs if j["id"] == payload.get("job_id")), None)
+    job_id = int(payload.get("job_id"))
+    job = next((j for j in _jobs if j["id"] == job_id), None)
     if not job:
         raise HTTPException(status_code=404, detail="job not found")
     job["status"] = "finished"
