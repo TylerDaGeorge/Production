@@ -108,3 +108,19 @@ def test_delete_job():
     assert response.json()["id"] == jid
     response = client.get(f"/jobs/{jid}")
     assert response.status_code == 404
+
+
+def test_archive_and_history():
+    job = client.post("/jobs/", json={"part_number": "ARC"}).json()
+    jid = job["id"]
+    client.post("/jobs/complete", json={"job_id": jid})
+
+    arch = client.post("/jobs/archive", json={"job_id": jid})
+    assert arch.status_code == 200
+    assert arch.json()["id"] == jid
+
+    jobs = client.get("/jobs/").json()
+    assert all(j["id"] != jid for j in jobs)
+
+    history = client.get("/jobs/history").json()
+    assert any(j["id"] == jid for j in history)

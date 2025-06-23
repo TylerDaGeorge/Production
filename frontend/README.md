@@ -19,5 +19,8 @@ with Python's built-in HTTP server.
    ```
    Then open your browser to [http://localhost:8080](http://localhost:8080).
 
-The UI allows you to create jobs and claim/complete them using the existing
-API endpoints.
+The UI allows you to create jobs, update their status, delete them, and
+archive finished jobs to a simple history page.
+
+Open `index.html` for the active job board or `history.html` to view the
+archive.

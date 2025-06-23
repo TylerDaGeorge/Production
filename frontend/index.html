@@ -11,6 +11,7 @@
 </head>
 <body>
 <h1>Job Board</h1>
+<p><a href="history.html">View Completed Jobs</a></p>
 <div id="jobs">Loading...</div>
 
 <h2>Create Job</h2>
@@ -30,30 +31,55 @@ async function loadJobs() {
         const div = document.createElement('div');
         div.className = 'job';
         div.innerHTML = `<strong>${j.part_number || ''}</strong> - ${j.status}`;
-        const claimBtn = document.createElement('button');
-        claimBtn.textContent = 'Claim';
-        claimBtn.onclick = async () => {
-            const user = prompt('Username');
-            if(!user) return;
-            await fetch(`${API}/jobs/claim`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({job_id: j.id, username: user})
-            });
+
+        if (j.status === 'unclaimed') {
+            const startBtn = document.createElement('button');
+            startBtn.textContent = 'Start';
+            startBtn.onclick = async () => {
+                const user = prompt('Username');
+                if(!user) return;
+                await fetch(`${API}/jobs/claim`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({job_id: j.id, username: user})
+                });
+                loadJobs();
+            };
+            div.appendChild(startBtn);
+        } else if (j.status === 'running') {
+            const finishBtn = document.createElement('button');
+            finishBtn.textContent = 'Finish';
+            finishBtn.onclick = async () => {
+                await fetch(`${API}/jobs/complete`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({job_id: j.id})
+                });
+                loadJobs();
+            };
+            div.appendChild(finishBtn);
+        } else if (j.status === 'finished') {
+            const archiveBtn = document.createElement('button');
+            archiveBtn.textContent = 'Archive';
+            archiveBtn.onclick = async () => {
+                await fetch(`${API}/jobs/archive`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({job_id: j.id})
+                });
+                loadJobs();
+            };
+            div.appendChild(archiveBtn);
+        }
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = async () => {
+            await fetch(`${API}/jobs/${j.id}`, { method: 'DELETE' });
             loadJobs();
         };
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = 'Complete';
-        completeBtn.onclick = async () => {
-            await fetch(`${API}/jobs/complete`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({job_id: j.id})
-            });
-            loadJobs();
-        };
-        div.appendChild(claimBtn);
-        div.appendChild(completeBtn);
+        div.appendChild(deleteBtn);
+
         container.appendChild(div);
     });
 }
