@@ -6,6 +6,7 @@ app = FastAPI(title="Hybrid Production Scheduler")
 
 _users: List[dict] = []
 _jobs: List[dict] = []
+_history: List[dict] = []
 _next_user_id = 1
 _next_job_id = 1
 
@@ -66,6 +67,25 @@ def get_user_jobs(username: str):
 @app.get("/jobs/")
 def read_jobs():
     return _jobs
+
+
+@app.get("/jobs/history")
+def read_job_history():
+    """Return archived (completed) jobs"""
+    return _history
+
+
+@app.post("/jobs/archive")
+def archive_job(payload: Dict):
+    job_id = int(payload.get("job_id"))
+    index = next((i for i, j in enumerate(_jobs) if j["id"] == job_id), None)
+    if index is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    job = _jobs.pop(index)
+    job["archived_at"] = utc_now().isoformat()
+    job["history"].append({"timestamp": job["archived_at"], "event": "archived"})
+    _history.append(job)
+    return job
 
 
 @app.get("/jobs/{job_id}")
